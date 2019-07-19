@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sticky_headers/sticky_headers/widget.dart';
+// import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:twosuk/profile/comment.dart';
 import 'package:twosuk/profile/post.dart';
 import 'package:twosuk/profile/vote.dart';
@@ -17,7 +17,6 @@ class _ProfileState extends State<Profile>  with SingleTickerProviderStateMixin 
 
   @override
   void initState() {
-    // TODO: implement initState
     controllerProfile = TabController(vsync: this, length: 3, initialIndex: 0);
     super.initState();
   }
@@ -25,7 +24,6 @@ class _ProfileState extends State<Profile>  with SingleTickerProviderStateMixin 
   @override
   void dispose() {
     controllerProfile.dispose();
-    // TODO: implement dispose
     super.dispose();
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toast/toast.dart';
 import 'package:twosuk/add.dart';
@@ -8,7 +9,12 @@ import 'package:twosuk/profile.dart';
 import 'feed.dart';
 import 'home.dart';
 
-void main() => runApp(MainPage());
+void main() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MainPage());
+  });
+}
 
 class MainPage extends StatefulWidget {
   MainPage({Key key}) : super(key: key);
@@ -26,14 +32,12 @@ class _MainPageState extends State<MainPage>
 
   @override
   void initState() {
-    // TODO: implement initState
     controllerMain = TabController(vsync: this, length: 5, initialIndex: 0);
     super.initState();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controllerMain.dispose();
     super.dispose();
   }
@@ -127,17 +131,18 @@ class _MainPageState extends State<MainPage>
         controllerMain.index = 0;
         // mainIndex=0;
       });
-    } else {
-      if (backButtonHasNotBeenPressedOrSnackBarHasBeenClosed) {
-        backButtonPressTime = currentTime;
-        // Scaffold.of(context).showSnackBar(snackBar);
-
-        Toast.show('Press once again to exit', context,
-            duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-        return false;
-      }
-
-      return true;
+      return false;
     }
+
+    if (backButtonHasNotBeenPressedOrSnackBarHasBeenClosed) {
+      backButtonPressTime = currentTime;
+      // Scaffold.of(context).showSnackBar(snackBar);
+
+      Toast.show('Press once again to exit', context,
+          duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+      return false;
+    }
+
+    return true;
   }
 }
