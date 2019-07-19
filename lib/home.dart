@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:toast/toast.dart';
+// import 'package:toast/toast.dart';
 import 'package:twosuk/home/fresh.dart';
 import 'package:twosuk/home/hot.dart';
 import 'package:twosuk/search.dart';
@@ -17,7 +17,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-    // TODO: implement initState
     controllerHome = TabController(vsync: this, length: 2, initialIndex: 0);
     controllerHome.addListener(() {
       setState(() {
@@ -31,7 +30,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controllerHome.dispose();
     super.dispose();
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:twosuk/favorite/following.dart';
 import 'package:twosuk/favorite/you.dart';
 
@@ -15,7 +15,6 @@ class _FavoriteState extends State<Favorite>
 
   @override
   void initState() {
-    // TODO: implement initState
     controllerFavorite = TabController(vsync: this, length: 2, initialIndex: 1);
     super.initState();
   }
@@ -23,7 +22,6 @@ class _FavoriteState extends State<Favorite>
   @override
   void dispose() {
     controllerFavorite.dispose();
-    // TODO: implement dispose
     super.dispose();
   }
 
