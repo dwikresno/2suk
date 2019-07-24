@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:twosuk/favorite/following.dart';
-import 'package:twosuk/favorite/you.dart';
+import 'package:twosuk/page/favorite/following.dart';
+import 'package:twosuk/page/favorite/you.dart';
 
 class Favorite extends StatefulWidget {
   Favorite({Key key}) : super(key: key);

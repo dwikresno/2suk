@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
-import 'package:twosuk/add.dart';
-import 'package:twosuk/favorite.dart';
-import 'package:twosuk/profile.dart';
-
-import 'feed.dart';
-import 'home.dart';
+import 'package:twosuk/page/add.dart';
+import 'package:twosuk/page/favorite.dart';
+import 'package:twosuk/page/feed.dart';
+import 'package:twosuk/page/home.dart';
+import 'package:twosuk/page/profile.dart';
+import 'package:twosuk/provider/provider_service.dart';
 
 void main() {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
+    Provider.debugCheckInvalidValueType = null;
     runApp(new MainPage());
   });
 }
@@ -47,75 +49,78 @@ class _MainPageState extends State<MainPage>
   Widget build(BuildContext context) {
     return MaterialApp(
       color: Colors.white,
-      home: Scaffold(
-        body: Builder(builder: (BuildContext context) {
-          // The BuildContext must be from one of the Scaffold's children.
-          return WillPopScope(
-            onWillPop: () => onWillPop(context),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                FocusScope.of(context).requestFocus(new FocusNode());
-              },
-              child: TabBarView(
-                controller: controllerMain,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  Home(),
-                  Feed(),
-                  Add(),
-                  Favorite(),
-                  Profile(),
-                ],
-              ),
-            ),
-          );
-        }),
-        bottomNavigationBar: new TabBar(
-          controller: controllerMain,
-          onTap: (index) {
-            print("tab all index ke $index");
-          },
-          isScrollable: false,
-          tabs: [
-            Tab(
-              icon: new Icon(Icons.home),
-            ),
-            Tab(
-              icon: new Icon(Icons.rss_feed),
-            ),
-            Tab(
-              icon: new Icon(FontAwesomeIcons.plusSquare),
-            ),
-            Tab(
-              icon: new Icon(Icons.favorite),
-            ),
-            Tab(
-              // icon: new Icon(Icons.person_pin),
-              icon: Container(
-                // padding: EdgeInsets.all(50),
-                margin: EdgeInsets.all(5),
-                height: 24,
-                width: 24,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(50),
+      home: ChangeNotifierProvider<ProviderService>(
+          builder: (_) => ProviderService(),
+          child: Scaffold(
+            body: Builder(builder: (BuildContext context) {
+              final providerService = Provider.of<ProviderService>(context);
+              // The BuildContext must be from one of the Scaffold's children.
+              return WillPopScope(
+                onWillPop: () => onWillPop(context),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(new FocusNode());
+                  },
+                  child: TabBarView(
+                    controller: controllerMain,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      Home(),
+                      Feed(providerService),
+                      Add(),
+                      Favorite(),
+                      Profile(),
+                    ],
+                  ),
                 ),
-                child: Image.asset('assets/images/avatar-6.jpg'),
+              );
+            }),
+            bottomNavigationBar: new TabBar(
+              controller: controllerMain,
+              onTap: (index) {
+                print("tab all index ke $index");
+              },
+              isScrollable: false,
+              tabs: [
+                Tab(
+                  icon: new Icon(Icons.home),
+                ),
+                Tab(
+                  icon: new Icon(Icons.rss_feed),
+                ),
+                Tab(
+                  icon: new Icon(FontAwesomeIcons.plusSquare),
+                ),
+                Tab(
+                  icon: new Icon(Icons.favorite),
+                ),
+                Tab(
+                  // icon: new Icon(Icons.person_pin),
+                  icon: Container(
+                    // padding: EdgeInsets.all(50),
+                    margin: EdgeInsets.all(5),
+                    height: 24,
+                    width: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Image.asset('assets/images/avatar-6.jpg'),
+                  ),
+                ),
+              ],
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.black38,
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(width: 0.0),
               ),
+              // indicatorSize: TabBarIndicatorSize.label,
+              indicatorPadding: EdgeInsets.all(5.0),
+              indicatorColor: Colors.black45,
             ),
-          ],
-          labelColor: Colors.black,
-          unselectedLabelColor: Colors.black38,
-          indicator: UnderlineTabIndicator(
-            borderSide: BorderSide(width: 0.0),
-          ),
-          // indicatorSize: TabBarIndicatorSize.label,
-          indicatorPadding: EdgeInsets.all(5.0),
-          indicatorColor: Colors.black45,
-        ),
-        backgroundColor: Colors.white,
-      ),
+            backgroundColor: Colors.white,
+          )),
     );
   }
 

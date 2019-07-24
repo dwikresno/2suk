@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share/share.dart';
 import 'package:toast/toast.dart';
-import 'package:twosuk/widget.dart';
+import 'package:twosuk/page/widget.dart';
 
 class Hot extends StatefulWidget {
   Hot({Key key}) : super(key: key);

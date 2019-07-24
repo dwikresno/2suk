@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // import 'package:sticky_headers/sticky_headers/widget.dart';
-import 'package:twosuk/profile/comment.dart';
-import 'package:twosuk/profile/post.dart';
-import 'package:twosuk/profile/vote.dart';
-import 'package:twosuk/widget.dart';
+import 'package:twosuk/page/profile/comment.dart';
+import 'package:twosuk/page/profile/post.dart';
+import 'package:twosuk/page/profile/vote.dart';
+import 'package:twosuk/page/widget.dart';
 
 class Profile extends StatefulWidget {
   Profile({Key key}) : super(key: key);
