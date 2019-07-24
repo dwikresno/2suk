@@ -1,6 +1,7 @@
 # twosuk
 
 A new Flutter project.
+Flutter version 1.7 hotfix 3
 
 ## Getting Started
 
