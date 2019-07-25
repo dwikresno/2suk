@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:twosuk/model/content_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:twosuk/model/new_model.dart';
+import 'package:twosuk/model/photo_dart.dart';
 
 String urlService = 'http://192.168.90.34/seniku/api';
 
@@ -62,5 +63,24 @@ class ProviderService with ChangeNotifier {
     }
     print(res.body);
     return newsModelFromJson(data);
+  }
+
+  Future<PhotoModel> getPhoto() async {
+    urlService="https://reqres.in/api/users?page=1";
+    var data;
+    var params = {
+      "mode": "get_banner",
+      "ua": "Shop_Android_1",
+      "uid": "1",
+      "token": "0b7b368c99df42b592eb850c6e929244"
+    };
+
+    var res = await http.get(Uri.encodeFull(urlService),headers: {"Accept": "application/json"});
+    // print(res.statusCode);
+    if (res.statusCode == 200) {
+      data = res.body;
+    }
+    print(res.body);
+    return photoModelFromJson(data);
   }  
 }
