@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:twosuk/model/content_model.dart';
 import 'package:twosuk/model/new_model.dart';
 import 'package:twosuk/model/photo_dart.dart';
@@ -27,6 +29,8 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
   Future getData;
   var isLostConnection = false;
   var pageSize = 3;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: true);
 
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
     setState(() {
       isLostConnection = false;
     });
-    _checkConnection();
+    // _checkConnection();
     super.initState();
   }
 
@@ -42,20 +46,56 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
     var connectivityResult = await (Connectivity().checkConnectivity());
     print(connectivityResult);
     if (connectivityResult == ConnectivityResult.none) {
-      setState(() {
-        isLostConnection = true;
-      });
+      if (mounted)
+        setState(() {
+          isLostConnection = true;
+        });
     } else {
-      setState(() {
-        getData = widget.providerService.getPhoto();
-        isLostConnection = false;
-      });
+      if (mounted)
+        setState(() {
+          getData = widget.providerService.getPhoto();
+          isLostConnection = false;
+          _refreshController.loadComplete();
+        });
     }
     // if (connectivityResult == ConnectivityResult.mobile) {
     //   // I am connected to a mobile network.
     // } else if (connectivityResult == ConnectivityResult.wifi) {
     //   // I am connected to a wifi network.
     // }
+  }
+
+  void _onRefresh() async {
+    // monitor network fetch
+    if (mounted) _checkConnection();
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use refreshFailed()
+    // if (mounted)
+    //   setState(() {
+    //     getData = widget.providerService.getPhoto();
+    //   });
+    
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if (mounted) _checkConnection();
+
+    _refreshController.loadComplete();
+  }
+
+  // void _finish() {
+  //   _refreshController.refreshCompleted();
+  // }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _refreshController.dispose();
+    super.dispose();
   }
 
   @override
@@ -76,66 +116,83 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
           ),
         ],
       ),
-      body: isLostConnection
-          ? _offline()
-          : FutureBuilder<PhotoModel>(
-              key: UniqueKey(),
-              future: getData,
-              builder: (context, snapshot) {
-                Widget centerLoading = Center(
-                  child: CircularProgressIndicator(),
-                );
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasError) {
-                    print(snapshot.error);
-                    return centerLoading;
+      body: SmartRefresher(
+        enablePullDown: true,
+        // enablePullUp: true,
+        header: WaterDropMaterialHeader(),
+        footer: CustomFooter(
+          builder: (BuildContext context, LoadStatus mode) {
+            Widget body;
+            if (mode == LoadStatus.idle) {
+              body = Text("pull up load");
+            } else if (mode == LoadStatus.loading) {
+              body = CupertinoActivityIndicator();
+            } else if (mode == LoadStatus.failed) {
+              body = Text("Load Failed!Click retry!");
+            } else {
+              body = Text("No more Data");
+            }
+            return Container(
+              height: 55.0,
+              child: Center(child: body),
+            );
+          },
+        ),
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: isLostConnection
+            ? _offline()
+            : FutureBuilder<PhotoModel>(
+                key: UniqueKey(),
+                future: getData,
+                builder: (context, snapshot) {
+                  Widget centerLoading = Center(
+                    child: CircularProgressIndicator(),
+                  );
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasError) {
+                      print(snapshot.error);
+                      return Container();
+                    } else {
+                      return SingleChildScrollView(
+                        child: PagewiseListView(
+                          key: UniqueKey(),
+                          shrinkWrap: true,
+                          physics: ScrollPhysics(),
+                          pageSize: pageSize,
+                          itemBuilder: cobaBanner,
+                          pageFuture: (pageIndex) => widget.providerService
+                              .getPhotoList(pageIndex + 1),
+                          noItemsFoundBuilder: (context) {
+                            return Center(
+                              child: Container(
+                                child: Text('Data not found'),
+                              ),
+                            );
+                          },
+                          loadingBuilder: (context) {
+                            return centerLoading;
+                          },
+                          showRetry: false,
+                          errorBuilder: (context, error) {
+                            return Column(children: [
+                              Expanded(child: Container()),
+                              Text(
+                                "Something went wrong",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ]);
+                          },
+                        ),
+                      );
+                    }
                   } else {
-                    return SingleChildScrollView(
-                      child: PagewiseListView(
-                        key: UniqueKey(),
-                        shrinkWrap: true,
-                        physics: ScrollPhysics(),
-                        pageSize: pageSize,
-                        itemBuilder: cobaBanner,
-                        pageFuture: (pageIndex) =>
-                            widget.providerService.getPhotoList(pageIndex + 1),
-                        noItemsFoundBuilder: (context) {
-                          return Center(
-                            child: Container(
-                              child: Text('Data not found'),
-                            ),
-                          );
-                        },
-                        loadingBuilder: (context) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        },
-                        showRetry: false,
-                        errorBuilder: (context, error) {
-                          return Column(children: [
-                            Expanded(child: Container()),
-                            Text(
-                              "Something went wrong",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ]);
-                        },
-                      ),
-                    );
+                    return Container();
+                    // return centerLoading;
                   }
-                } else {
-                  return centerLoading;
-                }
-              },
-            ),
-      floatingActionButton: IconButton(
-        onPressed: () {
-          setState(() {
-            _checkConnection();
-          });
-        },
-        icon: Icon(Icons.refresh),
+                },
+              ),
       ),
     );
   }
@@ -163,7 +220,7 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
   }
 
   Widget cobaBanner(context, PhotosModel photos, _) {
-    // print(bl[0].image);
+    //  _refreshController.refreshCompleted();
     return photos.avatar != null
         ? Card(
             elevation: 5,

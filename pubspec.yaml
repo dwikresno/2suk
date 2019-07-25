@@ -33,6 +33,7 @@ dependencies:
   provider: ^3.0.0+1
   connectivity: ^0.4.3+6
   flutter_pagewise: ^1.2.3
+  pull_to_refresh: ^1.5.1
 
 dev_dependencies:
   flutter_test:
