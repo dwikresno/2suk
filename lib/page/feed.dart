@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pagewise/flutter_pagewise.dart';
 import 'package:provider/provider.dart';
 import 'package:twosuk/model/content_model.dart';
 import 'package:twosuk/model/new_model.dart';
@@ -25,6 +26,7 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
   var colorTab = Colors.deepOrange[700];
   Future getData;
   var isLostConnection = false;
+  var pageSize = 3;
 
   @override
   void initState() {
@@ -88,7 +90,39 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
                     print(snapshot.error);
                     return centerLoading;
                   } else {
-                    return banner(snapshot.data.photos);
+                    return SingleChildScrollView(
+                      child: PagewiseListView(
+                        key: UniqueKey(),
+                        shrinkWrap: true,
+                        physics: ScrollPhysics(),
+                        pageSize: pageSize,
+                        itemBuilder: cobaBanner,
+                        pageFuture: (pageIndex) =>
+                            widget.providerService.getPhotoList(pageIndex + 1),
+                        noItemsFoundBuilder: (context) {
+                          return Center(
+                            child: Container(
+                              child: Text('Data not found'),
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        showRetry: false,
+                        errorBuilder: (context, error) {
+                          return Column(children: [
+                            Expanded(child: Container()),
+                            Text(
+                              "Something went wrong",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ]);
+                        },
+                      ),
+                    );
                   }
                 } else {
                   return centerLoading;
@@ -128,59 +162,102 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  Widget cobaBanner(context, PhotosModel photos, _) {
+    // print(bl[0].image);
+    return photos.avatar != null
+        ? Card(
+            elevation: 5,
+            child: Row(
+              children: <Widget>[
+                Container(
+                  height: 100,
+                  width: 100,
+                  child: ClipRRect(
+                    borderRadius: new BorderRadius.only(
+                      topLeft: Radius.circular(5.0),
+                      bottomLeft: Radius.circular(5.0),
+                    ),
+                    child: FadeInImage(
+                      image: NetworkImage(photos.avatar),
+                      width: double.infinity,
+                      // height: screenAwareSize(100.0, context),
+                      fit: BoxFit.fill,
+                      placeholder: AssetImage('assets/images/no_image.jpg'),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        child: Text(photos.firstName),
+                      ),
+                      Container(
+                        child: Text(photos.email),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )
+        : Container();
+  }
+
   Widget banner(List<PhotosModel> photos) {
     // print(bl[0].image);
-    return SingleChildScrollView(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.8,
-        width: MediaQuery.of(context).size.width,
-        child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          itemCount: photos.length,
-          itemBuilder: (context, index) {
-            return photos[index].avatar != null
-                ? Card(
-                    elevation: 5,
-                    child: Row(
-                      children: <Widget>[
-                        Container(
-                          height: 100,
-                          width: 100,
-                          child: ClipRRect(
-                            borderRadius: new BorderRadius.only(
-                              topLeft: Radius.circular(5.0),
-                              bottomLeft: Radius.circular(5.0),
-                            ),
-                            child: FadeInImage(
-                              image: NetworkImage(photos[index].avatar),
-                              width: double.infinity,
-                              // height: screenAwareSize(100.0, context),
-                              fit: BoxFit.fill,
-                              placeholder:
-                                  AssetImage('assets/images/no_image.jpg'),
-                            ),
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      width: MediaQuery.of(context).size.width,
+      child: ListView.builder(
+        scrollDirection: Axis.vertical,
+        itemCount: photos.length,
+        itemBuilder: (context, index) {
+          return photos[index].avatar != null
+              ? Card(
+                  elevation: 5,
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        height: 100,
+                        width: 100,
+                        child: ClipRRect(
+                          borderRadius: new BorderRadius.only(
+                            topLeft: Radius.circular(5.0),
+                            bottomLeft: Radius.circular(5.0),
+                          ),
+                          child: FadeInImage(
+                            image: NetworkImage(photos[index].avatar),
+                            width: double.infinity,
+                            // height: screenAwareSize(100.0, context),
+                            fit: BoxFit.fill,
+                            placeholder:
+                                AssetImage('assets/images/no_image.jpg'),
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            // mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                child: Text(photos[index].firstName),
-                              ),
-                              Container(
-                                child: Text(photos[index].email),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ))
-                : Container();
-          },
-        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          // mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Text(photos[index].firstName),
+                            ),
+                            Container(
+                              child: Text(photos[index].email),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ))
+              : Container();
+        },
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share/share.dart';
 import 'package:toast/toast.dart';
+import 'package:twosuk/page/detail.dart';
 import 'package:twosuk/page/widget.dart';
 
 class Hot extends StatefulWidget {
@@ -100,17 +101,17 @@ class _HotState extends State<Hot> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
         body: CustomScrollView(
-      slivers: <Widget>[
-        SliverToBoxAdapter(
-          child: story(),
-        ),
-        SliverToBoxAdapter(
-          child: feed(),
-        )
-      ],
-    ));
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: story(),
+            ),
+            SliverToBoxAdapter(
+              child: feed(),
+            )
+          ],
+        ));
   }
 
   Widget story() {
@@ -164,7 +165,14 @@ class _HotState extends State<Hot> {
                         ),
                       ),
                     ),
-                    Text(feeds[index]['name'].substring(0, 9))
+                    GestureDetector(
+                      onTap: (){
+                        DetailPage();
+                      },
+                      child: Text(
+                        feeds[index]['name'].substring(0, 9),
+                      ),
+                    )
                   ],
                 )
               ],
@@ -336,15 +344,15 @@ class _HotState extends State<Hot> {
                       padding: EdgeInsets.only(left: 5, right: 10),
                       child: Icon(FontAwesomeIcons.commentDots),
                     ),
-                    // 
+                    //
                     GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         Share.share('https://google.com');
                       },
                       child: Padding(
-                      padding: EdgeInsets.only(left: 5, right: 5),
-                      child: Icon(Icons.share),
-                    ),
+                        padding: EdgeInsets.only(left: 5, right: 5),
+                        child: Icon(Icons.share),
+                      ),
                     )
                   ],
                 ),
