@@ -5,14 +5,20 @@ import 'package:twosuk/page/profile/comment.dart';
 import 'package:twosuk/page/profile/post.dart';
 import 'package:twosuk/page/profile/vote.dart';
 import 'package:twosuk/page/widget.dart';
+import 'package:twosuk/provider/provider_service.dart';
 
 class Profile extends StatefulWidget {
-  Profile({Key key}) : super(key: key);
+  final ProviderService providerService;
 
-  _ProfileState createState() => _ProfileState();
+  @override
+  State<StatefulWidget> createState() {
+    return _ProfileState();
+  }
+
+  Profile(this.providerService);
 }
 
-class _ProfileState extends State<Profile>  with SingleTickerProviderStateMixin {
+class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   TabController controllerProfile;
 
   @override
@@ -53,8 +59,7 @@ class _ProfileState extends State<Profile>  with SingleTickerProviderStateMixin 
         ],
       ),
       body: NestedScrollView(
-          headerSliverBuilder:
-              (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               new SliverAppBar(
                 expandedHeight: 200,
@@ -270,7 +275,7 @@ class _ProfileState extends State<Profile>  with SingleTickerProviderStateMixin 
 
   void showConfig(context) {
     showModalBottomSheet(
-        backgroundColor:Color(0xFF737373),
+        backgroundColor: Color(0xFF737373),
         elevation: 1,
         isScrollControlled: true,
         context: context,
@@ -294,6 +299,25 @@ class _ProfileState extends State<Profile>  with SingleTickerProviderStateMixin 
                     leading: new Icon(Icons.report),
                     title: new Text('Report'),
                     onTap: () => {}),
+                new ListTile(
+                    leading: new Icon(FontAwesomeIcons.signOutAlt),
+                    title: new Text('Logout'),
+                    onTap: () => {}),
+                Padding(
+                  padding: EdgeInsets.only(top:20),
+                ),
+                new ListTile(
+                    leading: new Icon(FontAwesomeIcons.info),
+                    title: new Text('Version v.${widget.providerService.getAppVersion()}'),
+                ),
+                new ListTile(
+                    leading: new Icon(FontAwesomeIcons.info),
+                    title: new Text('Version v.${widget.providerService.getAppName()}'),
+                ),
+                new ListTile(
+                    leading: new Icon(FontAwesomeIcons.info),
+                    title: new Text('Version v.${widget.providerService.getAppOS()}'),
+                )
               ],
             ),
           );

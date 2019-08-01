@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:twosuk/page/favorite/following.dart';
 import 'package:twosuk/page/favorite/you.dart';
+import 'package:twosuk/provider/provider_service.dart';
 
 class Favorite extends StatefulWidget {
-  Favorite({Key key}) : super(key: key);
+final ProviderService providerService;
 
-  _FavoriteState createState() => _FavoriteState();
+  @override
+  State<StatefulWidget> createState() {
+    return _FavoriteState();
+  }
+
+  Favorite(this.providerService);
 }
 
 class _FavoriteState extends State<Favorite>
@@ -60,7 +66,7 @@ class _FavoriteState extends State<Favorite>
         controller: controllerFavorite,
         // physics: ScrollableScrollPhysics(),
         children: [
-          Following(),
+          Following(widget.providerService),
           You(),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
+import 'package:twosuk/model/content_model.dart';
 import 'package:twosuk/page/add.dart';
 import 'package:twosuk/page/favorite.dart';
 import 'package:twosuk/page/feed.dart';
@@ -28,6 +29,7 @@ class _MainPageState extends State<MainPage>
     with SingleTickerProviderStateMixin {
   static const snackBarDuration = Duration(seconds: 2);
   TabController controllerMain;
+  
 
   DateTime backButtonPressTime;
   var mainIndex = 0;
@@ -50,32 +52,33 @@ class _MainPageState extends State<MainPage>
     return MaterialApp(
       color: Colors.white,
       home: ChangeNotifierProvider<ProviderService>(
-          builder: (_) => ProviderService(),
-          child: Scaffold(
-            body: Builder(builder: (BuildContext context) {
-              final providerService = Provider.of<ProviderService>(context);
-              // The BuildContext must be from one of the Scaffold's children.
-              return WillPopScope(
-                onWillPop: () => onWillPop(context),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    FocusScope.of(context).requestFocus(new FocusNode());
-                  },
-                  child: TabBarView(
-                    controller: controllerMain,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      Home(),
-                      Feed(providerService),
-                      Add(),
-                      Favorite(),
-                      Profile(),
-                    ],
-                  ),
+        builder: (_) => ProviderService(),
+        child: FutureBuilder<ContentModel>(
+          builder: (context,snapshot) {
+          final providerService = Provider.of<ProviderService>(context);
+          providerService.getAppInfo();
+          // The BuildContext must be from one of the Scaffold's children.
+          return Scaffold(
+            body: WillPopScope(
+              onWillPop: () => onWillPop(context),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                },
+                child: TabBarView(
+                  controller: controllerMain,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: [
+                    Home(providerService),
+                    Feed(providerService),
+                    Add(),
+                    Favorite(providerService),
+                    Profile(providerService),
+                  ],
                 ),
-              );
-            }),
+              ),
+            ),
             bottomNavigationBar: new TabBar(
               controller: controllerMain,
               onTap: (index) {
@@ -93,7 +96,31 @@ class _MainPageState extends State<MainPage>
                   icon: new Icon(FontAwesomeIcons.plusSquare),
                 ),
                 Tab(
-                  icon: new Icon(Icons.favorite),
+                  icon: Stack(
+                    children: <Widget>[
+                      new Icon(Icons.favorite),
+                      Positioned(
+                        // top: 10,
+                        right: 0,
+                        child: providerService.getCounter() != 0
+                            ? Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(50)),
+                                child: Center(
+                                  child: Text(
+                                    providerService.getCounter().toString(),
+                                    style: TextStyle(
+                                        fontSize: 10, color: Colors.white),
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                      )
+                    ],
+                  ),
                 ),
                 Tab(
                   // icon: new Icon(Icons.person_pin),
@@ -120,9 +147,13 @@ class _MainPageState extends State<MainPage>
               indicatorColor: Colors.black45,
             ),
             backgroundColor: Colors.white,
-          )),
+          );
+        }),
+      ),
     );
   }
+
+  
 
   Future<bool> onWillPop(BuildContext context) async {
     DateTime currentTime = DateTime.now();

@@ -1,16 +1,17 @@
-import 'dart:convert';
+// import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:twosuk/model/content_model.dart';
-import 'package:twosuk/model/new_model.dart';
+// import 'package:twosuk/model/content_model.dart';
+// import 'package:twosuk/model/new_model.dart';
 import 'package:twosuk/model/photo_dart.dart';
+import 'package:twosuk/page/notify.dart';
 import 'package:twosuk/provider/provider_service.dart';
-import 'package:twosuk/service/service.dart';
+// import 'package:twosuk/service/service.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Feed extends StatefulWidget {
@@ -34,7 +35,6 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
-    // TODO: implement initState
     setState(() {
       isLostConnection = false;
     });
@@ -74,7 +74,7 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
     //   setState(() {
     //     getData = widget.providerService.getPhoto();
     //   });
-    
+
     _refreshController.refreshCompleted();
   }
 
@@ -93,7 +93,6 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _refreshController.dispose();
     super.dispose();
   }
@@ -105,16 +104,7 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
         centerTitle: true,
         title: logo(),
         backgroundColor: Colors.white,
-        actions: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: Icon(Icons.search, color: Colors.black),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 5, right: 10),
-            child: Icon(Icons.notifications, color: Colors.black),
-          ),
-        ],
+        actions: <Widget>[Notify()],
       ),
       body: SmartRefresher(
         enablePullDown: true,
@@ -155,37 +145,41 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
                       print(snapshot.error);
                       return Container();
                     } else {
-                      return SingleChildScrollView(
-                        child: PagewiseListView(
-                          key: UniqueKey(),
-                          shrinkWrap: true,
-                          physics: ScrollPhysics(),
-                          pageSize: pageSize,
-                          itemBuilder: cobaBanner,
-                          pageFuture: (pageIndex) => widget.providerService
-                              .getPhotoList(pageIndex + 1),
-                          noItemsFoundBuilder: (context) {
-                            return Center(
-                              child: Container(
-                                child: Text('Data not found'),
-                              ),
-                            );
-                          },
-                          loadingBuilder: (context) {
-                            return centerLoading;
-                          },
-                          showRetry: false,
-                          errorBuilder: (context, error) {
-                            return Column(children: [
-                              Expanded(child: Container()),
-                              Text(
-                                "Something went wrong",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ]);
-                          },
-                        ),
-                      );
+                      if (widget.providerService.needUpdate) {
+                        return buildDialog(context);
+                      } else {
+                        return SingleChildScrollView(
+                          child: PagewiseListView(
+                            key: UniqueKey(),
+                            shrinkWrap: true,
+                            physics: ScrollPhysics(),
+                            pageSize: pageSize,
+                            itemBuilder: cobaBanner,
+                            pageFuture: (pageIndex) => widget.providerService
+                                .getPhotoList(pageIndex + 1),
+                            noItemsFoundBuilder: (context) {
+                              return Center(
+                                child: Container(
+                                  child: Text('Data not found'),
+                                ),
+                              );
+                            },
+                            loadingBuilder: (context) {
+                              return centerLoading;
+                            },
+                            showRetry: false,
+                            errorBuilder: (context, error) {
+                              return Column(children: [
+                                Expanded(child: Container()),
+                                Text(
+                                  "Something went wrong",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ]);
+                            },
+                          ),
+                        );
+                      }
                     }
                   } else {
                     return Container();
@@ -195,6 +189,12 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
               ),
       ),
     );
+  }
+
+  Widget buildDialog(BuildContext context) {
+    Future.delayed(
+        Duration.zero, () => widget.providerService.showVersionDialog(context));
+    return Container();
   }
 
   Widget _offline() {
@@ -336,6 +336,5 @@ class _FeedState extends State<Feed> with AutomaticKeepAliveClientMixin {
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:twosuk/model/content_model.dart';
 // import 'package:toast/toast.dart';
 import 'package:twosuk/page/home/fresh.dart';
 import 'package:twosuk/page/home/hot.dart';
-import 'package:twosuk/page/search.dart';
+import 'package:twosuk/page/notify.dart';
+import 'package:twosuk/provider/provider_service.dart';
+// import 'package:twosuk/page/search.dart';
 
 class Home extends StatefulWidget {
-  Home({Key key}) : super(key: key);
+  final ProviderService providerService;
 
-  _HomeState createState() => _HomeState();
+  @override
+  State<StatefulWidget> createState() {
+    return _HomeState();
+  }
+
+  Home(this.providerService);
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
@@ -36,86 +44,54 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 2,
-          centerTitle: true,
-          title: logo(),
+    return FutureBuilder<ContentModel>(
+      future: widget.providerService.getContent(),
+      builder: (context, snapshot) {
+      if (widget.providerService.needUpdate) {
+        return buildDialog(context);
+      }
+      return Scaffold(
           backgroundColor: Colors.white,
-          actions: <Widget>[
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  new MaterialPageRoute(
-                    builder: (BuildContext context) => new Search(),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: EdgeInsets.all(5),
-                child: Icon(Icons.search, color: Colors.black),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                print(controllerHome.index);
-              },
-              child: Padding(
-                padding: EdgeInsets.only(top: 15, left: 5, right: 10),
-                child: Container(
-                  child: Stack(
-                    children: <Widget>[
-                      Icon(Icons.notifications, color: Colors.black),
-                      Positioned(
-                        // top: 10,
-                        right: 0,
-                        child: Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(50)),
-                          child: Center(
-                            child: Text(
-                              '99',
-                              style:
-                                  TextStyle(fontSize: 10, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            )
-          ],
-          bottom: TabBar(
-            controller: controllerHome,
-            onTap: (index) {
-              setState(() {
-                controllerHome.index == 0
-                    ? colorTab = Colors.deepOrange[700]
-                    : colorTab = Colors.blue;
-              });
-            },
-            indicatorColor: colorTab,
-            unselectedLabelColor: Colors.black38,
-            labelColor: colorTab,
-            tabs: [
-              Tab(icon: Icon(FontAwesomeIcons.fireAlt)),
-              Tab(icon: Icon(Icons.fiber_new)),
+          appBar: AppBar(
+            elevation: 2,
+            centerTitle: true,
+            title: logo(),
+            backgroundColor: Colors.white,
+            actions: <Widget>[
+              Notify(),
             ],
+            bottom: TabBar(
+              controller: controllerHome,
+              onTap: (index) {
+                setState(() {
+                  controllerHome.index == 0
+                      ? colorTab = Colors.deepOrange[700]
+                      : colorTab = Colors.blue;
+                });
+              },
+              indicatorColor: colorTab,
+              unselectedLabelColor: Colors.black38,
+              labelColor: colorTab,
+              tabs: [
+                Tab(icon: Icon(FontAwesomeIcons.fireAlt)),
+                Tab(icon: Icon(Icons.fiber_new)),
+              ],
+            ),
           ),
-        ),
-        body: TabBarView(
-          controller: controllerHome,
-          children: <Widget>[
-            Hot(),
-            Fresh(),
-          ],
-        ));
+          body: TabBarView(
+            controller: controllerHome,
+            children: <Widget>[
+              Hot(),
+              Fresh(),
+            ],
+          ));
+    });
+  }
+
+  Widget buildDialog(BuildContext context) {
+    Future.delayed(
+        Duration.zero, () => widget.providerService.showVersionDialog(context));
+    return Container();
   }
 
   Widget logo() {
